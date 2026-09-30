@@ -59,6 +59,10 @@ class AppConfig:
     aws_model_id: str = "global.anthropic.claude-sonnet-5"
     aws_profile: str | None = None
 
+    # Model provider: "bedrock" or "openai" (any OpenAI-compatible endpoint)
+    provider: str = "bedrock"
+    openai_base_url: str | None = None
+
     # Runtime configuration
     execution_timeout: float = 2400.0  # 40 minutes
     node_timeout: float = 1200.0  # 20 minutes per agent
@@ -82,6 +86,8 @@ class AppConfig:
         aws_region: str | None = None,
         aws_model_id: str | None = None,
         aws_profile: str | None = None,
+        provider: str | None = None,
+        openai_base_url: str | None = None,
         execution_timeout: float | None = None,
         node_timeout: float | None = None,
         ai_generated_tag: str | None = None,
@@ -111,8 +117,12 @@ class AppConfig:
         env_verbose = cls._get_env_bool("THREAT_COMPOSER_VERBOSE")
         env_enable_telemetry = cls._get_env_bool("THREAT_COMPOSER_ENABLE_TELEMETRY")
         env_aws_region = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")
-        env_aws_model_id = os.getenv("THREAT_COMPOSER_AWS_MODEL_ID")
+        env_aws_model_id = os.getenv("THREAT_COMPOSER_MODEL_ID") or os.getenv(
+            "THREAT_COMPOSER_AWS_MODEL_ID"
+        )
         env_aws_profile = os.getenv("AWS_PROFILE")
+        env_provider = os.getenv("THREAT_COMPOSER_PROVIDER")
+        env_openai_base_url = os.getenv("THREAT_COMPOSER_OPENAI_BASE_URL")
         env_execution_timeout = cls._get_env_float("THREAT_COMPOSER_EXECUTION_TIMEOUT")
         env_node_timeout = cls._get_env_float("THREAT_COMPOSER_NODE_TIMEOUT")
         env_ai_generated_tag = os.getenv("THREAT_COMPOSER_AI_GENERATED_TAG")
@@ -142,6 +152,8 @@ class AppConfig:
             aws_region=aws_region or env_aws_region or cls.aws_region,
             aws_model_id=aws_model_id or env_aws_model_id or cls.aws_model_id,
             aws_profile=aws_profile or env_aws_profile,
+            provider=provider or env_provider or cls.provider,
+            openai_base_url=openai_base_url or env_openai_base_url,
             execution_timeout=execution_timeout
             if execution_timeout is not None
             else (env_execution_timeout if execution_timeout is not None else 2400.0),

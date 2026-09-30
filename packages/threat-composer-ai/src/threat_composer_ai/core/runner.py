@@ -53,6 +53,8 @@ class WorkflowRunner:
         aws_region: str | None = None,
         aws_model_id: str | None = None,
         aws_profile: str | None = None,
+        provider: str | None = None,
+        openai_base_url: str | None = None,
         execution_timeout: float | None = None,
         node_timeout: float | None = None,
         invocation_source: str = "UNKNOWN",
@@ -93,6 +95,8 @@ class WorkflowRunner:
             aws_region=aws_region,
             aws_model_id=aws_model_id,
             aws_profile=aws_profile,
+            provider=provider,
+            openai_base_url=openai_base_url,
             execution_timeout=execution_timeout,
             node_timeout=node_timeout,
             invocation_source=invocation_source,
@@ -178,7 +182,7 @@ class WorkflowRunner:
                 validate_graphviz_installation()
 
             # 2. AWS credential validation (unless skipped)
-            if not skip_validation:
+            if not skip_validation and self.config.provider == "bedrock":
                 validate_aws_bedrock_access(self.config)
                 if not validate_aws_bedrock_inference(self.config):
                     return False, "AWS Bedrock inference validation failed"

@@ -38,9 +38,23 @@ _active_workflow_ref = {"workflow": None}
 )
 @click.option("--aws-region", type=str, help="AWS region for Bedrock API calls")
 @click.option(
-    "--aws-model-id", type=str, help="AWS Bedrock model ID to use for analysis"
+    "--model-id",
+    "--aws-model-id",
+    "aws_model_id",
+    type=str,
+    help="Model ID to use for analysis (Bedrock or OpenAI-compatible)",
 )
 @click.option("--aws-profile", type=str, help="AWS profile name to use for credentials")
+@click.option(
+    "--provider",
+    type=click.Choice(["bedrock", "openai"]),
+    help="Model provider (default: bedrock)",
+)
+@click.option(
+    "--openai-base-url",
+    type=str,
+    help="Base URL of the OpenAI-compatible endpoint (provider openai)",
+)
 @click.option(
     "--execution-timeout", type=float, help="Maximum execution timeout in seconds"
 )
@@ -69,6 +83,8 @@ def main(
     aws_region: str | None,
     aws_model_id: str | None,
     aws_profile: str | None,
+    provider: str | None,
+    openai_base_url: str | None,
     execution_timeout: float | None,
     node_timeout: float | None,
     skip_validation: bool,
@@ -107,6 +123,8 @@ def main(
         aws_region=aws_region,
         aws_model_id=aws_model_id,
         aws_profile=aws_profile,
+        provider=provider,
+        openai_base_url=openai_base_url,
         execution_timeout=execution_timeout,
         node_timeout=node_timeout,
         invocation_source="CLI",
@@ -170,6 +188,8 @@ def main(
             "aws_region": aws_region,
             "aws_model_id": aws_model_id,
             "aws_profile": aws_profile,
+            "provider": runner.config.provider,
+            "openai_base_url": runner.config.openai_base_url,
             "execution_timeout": execution_timeout,
             "node_timeout": node_timeout,
             "skip_validation": skip_validation,

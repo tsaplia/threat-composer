@@ -482,4 +482,30 @@ def create_agent_model(
     model_config = get_agent_model_config(agent_type, config)
     model_config.update(overrides)
 
+    if config and config.provider == "openai":
+        return create_openai_model(config=config, **model_config)
     return create_default_bedrock_model(config=config, **model_config)
+
+
+def create_openai_model(
+    model_id: str | None = None,
+    temperature: float = 0.3,
+    max_tokens: int = 32768,
+    config: AppConfig | None = None,
+    **_,
+):
+    """Create an OpenAI-compatible model (e.g. SovAI, vLLM) for threat modeling agents."""
+    import os
+
+    from strands.models.openai import OpenAIModel
+
+    # ceilings don't know this endpoint; raise it if agents hit max_tokens
+    cap = int(os.getenv("THREAT_COMPOSER_OPENAI_MAX_TOKENS", "16384"))
+    return OpenAIModel(
+        client_args={
+            "base_url": config.openai_base_url,
+            "api_key": os.environ["THREAT_COMPOSER_OPENAI_API_KEY"],
+        },
+        model_id=model_id or config.aws_model_id,
+        params={"max_tokens": min(max_tokens, cap), "temperature": temperature},
+    )
