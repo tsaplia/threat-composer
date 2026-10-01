@@ -178,6 +178,11 @@ def create_system_prompt(config: AppConfig):
     1. Your final reponse must be a single line. No formatting.
     """
 
+    # Optional domain reference material (e.g. OWASP Mobile, gematik cards)
+    if context_file := os.getenv("THREAT_COMPOSER_THREATS_CONTEXT_FILE"):
+        with open(context_file, encoding="utf-8") as f:
+            prompt_text += "\n\nREFERENCE MATERIAL:\n" + f.read()
+
     return create_cached_system_prompt(prompt_text)
 
 

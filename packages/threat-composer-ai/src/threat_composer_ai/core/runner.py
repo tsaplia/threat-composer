@@ -226,7 +226,11 @@ class WorkflowRunner:
             str(self.config.working_directory)
         )
 
-        return f"Analyze local directory: {relative_working_dir}"
+        task = f"Analyze local directory: {relative_working_dir}"
+        # Optional analysis scope (e.g. one interface), seen by every agent
+        if scope_file := os.getenv("THREAT_COMPOSER_SCOPE_FILE"):
+            task += "\n\n" + Path(scope_file).read_text(encoding="utf-8")
+        return task
 
     def _update_completion(self, accumulated_usage: dict | None = None) -> None:
         """Update run completion information."""

@@ -501,11 +501,15 @@ def create_openai_model(
 
     # ceilings don't know this endpoint; raise it if agents hit max_tokens
     cap = int(os.getenv("THREAT_COMPOSER_OPENAI_MAX_TOKENS", "16384"))
+    params = {"max_tokens": min(max_tokens, cap), "temperature": temperature}
+    # Extra request fields, e.g. {"chat_template_kwargs": {"enable_thinking": false}}
+    if extra_body := os.getenv("THREAT_COMPOSER_OPENAI_EXTRA_BODY"):
+        params["extra_body"] = json.loads(extra_body)
     return OpenAIModel(
         client_args={
             "base_url": config.openai_base_url,
             "api_key": os.environ["THREAT_COMPOSER_OPENAI_API_KEY"],
         },
         model_id=model_id or config.aws_model_id,
-        params={"max_tokens": min(max_tokens, cap), "temperature": temperature},
+        params=params,
     )
